@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agendamento Barbearia</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            background-color: #121212;
+            color: #FFD700;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 20px;
+            max-width: 1200px;
+            margin: auto;
+        }
+
+        .box {
+            background: #1E1E1E;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 15px rgba(255, 215, 0, 0.7);
+            width: 100%;
+            max-width: 500px;
+            text-align: center;
+        }
+
+        h3 {
+            border-bottom: 2px solid #FFD700;
+            padding-bottom: 10px;
+        }
+
+        input,
+        select,
+        button {
+            margin: 10px 0;
+            padding: 12px;
+            width: 100%;
+            max-width: 400px;
+            border-radius: 5px;
+            border: none;
+            display: block;
+            text-align: center;
+        }
+
+        .btn {
+            background-color: #FFD700;
+            color: #121212;
+            font-weight: bold;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: 0.3s;
+        }
+
+        .btn:hover {
+            background-color: #c5a300;
+            transform: scale(1.05);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 14px;
+            margin-top: 10px;
+        }
+
+        th,
+        td {
+            border: 1px solid #FFD700;
+            padding: 10px;
+            text-align: center;
+        }
+
+        th {
+            background-color: #FFD700;
+            color: #121212;
+        }
+    </style>
+    <script>
+        async function carregarHorariosDisponiveis() {
+            const profissional = document.getElementById('profissional').value;
+            if (!profissional) return;
+
+            try {
+                const response = await fetch(`http://127.0.0.1:5000/horarios_disponiveis/${profissional}`);
+                if (!response.ok) throw new Error('Erro ao carregar horários disponíveis');
+
+                const horarios = await response.json();
+                const selectHorario = document.getElementById('horario');
+                selectHorario.innerHTML = '<option value="">Selecione um horário</option>';
+
+                horarios.forEach(horario => {
+                    let option = document.createElement('option');
+                    option.value = horario;
+                    option.textContent = horario;
+                    selectHorario.appendChild(option);
+                });
+            } catch (error) {
+                alert(error.message);
+            }
+        }
+
+        async function cadastrarAgendamento() {
+            const nome = document.getElementById('nome').value;
+            const telefone = document.getElementById('telefone').value;
+            const servico = document.getElementById('servico').value;
+            const profissional = document.getElementById('profissional').value;
+            const horario = document.getElementById('horario').value;
+
+            if (!nome || !telefone || !servico || !profissional || !horario) {
+                alert("Preencha todos os campos!");
+                return;
+            }
+
+            try {
+                const response = await fetch('http://127.0.0.1:5000/agendamentos', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ nome, telefone, servico, profissional, horario })
+                });
+
+                const resultado = await response.json();
+                if (response.ok) {
+                    alert("Agendamento realizado com sucesso!");
+                    carregarAgendamentos();
+                } else {
+                    alert(resultado.erro || "Erro ao realizar agendamento.");
+                }
+            } catch (error) {
+                alert("Erro de conexão com o servidor.");
+            }
+        }
+
+        async function carregarAgendamentos() {
+            try {
+                const response = await fetch('http://127.0.0.1:5000/agendamentos');
+                if (!response.ok) throw new Error('Erro ao carregar agendamentos');
+
+                const agendamentos = await response.json();
+                const tabela = document.getElementById('agendamentos');
+                tabela.innerHTML = '<tr><th>Nome</th><th>Telefone</th><th>Serviço</th><th>Profissional</th><th>Horário</th><th>Ação</th></tr>';
+
+                if (agendamentos.length === 0) {
+                    tabela.innerHTML += '<tr><td colspan="6">Nenhum agendamento encontrado.</td></tr>';
+                } else {
+                    agendamentos.forEach(agendamento => {
+                        let row = tabela.insertRow();
+                        row.innerHTML = `<td>${agendamento.nome}</td><td>${agendamento.telefone}</td><td>${agendamento.servico}</td><td>${agendamento.profissional}</td><td>${agendamento.horario}</td><td><button onclick="deletarAgendamento(${agendamento.id})" class="btn">Excluir</button></td>`;
+                    });
+                }
+            } catch (error) {
+                alert(error.message);
+            }
+        }
+
+        async function deletarAgendamento(id) {
+            const senha = prompt("Digite a senha de administrador para excluir: ");
+            if (senha !== "admin1") {
+                alert("Senha incorreta!");
+                return;
+            }
+            if (!confirm("Tem certeza que deseja excluir este agendamento?")) return;
+            try {
+                const response = await fetch(`http://127.0.0.1:5000/agendamentos/${id}`, {
+                    method: 'DELETE'
+                });
+                const resultado = await response.json();
+                if (response.ok) {
+                    alert("Agendamento excluído com sucesso!");
+                    carregarAgendamentos();
+                } else {
+                    alert(resultado.erro || "Erro ao excluir agendamento.");
+                }
+            } catch (error) {
+                alert("Erro de conexão com o servidor.");
+            }
+        }
+    </script>
+</head>
+
+<body onload="carregarAgendamentos()">
+    <div class="container">
+        <div class="form-container box">
+            <h3>Agendar Horário</h3>
+            <input type="text" id="nome" placeholder="Nome">
+            <input type="text" id="telefone" placeholder="Telefone">
+            <select id="servico">
+                <option value="">Selecione um serviço</option>
+                <option value="Corte">Corte</option>
+                <option value="Barba">Barba</option>
+                <option value="Corte + Barba">Corte + Barba</option>
+            </select>
+            <select id="profissional" onchange="carregarHorariosDisponiveis()">
+                <option value="">Selecione um profissional</option>
+                <option value="João">João</option>
+                <option value="Carlos">Carlos</option>
+                <option value="Marcos">Marcos</option>
+            </select>
+            <select id="horario">
+                <option value="">Selecione um horário</option>
+            </select>
+            <button class="btn" onclick="cadastrarAgendamento()">Agendar</button>
+        </div>
+        <div class="table-container box">
+            <h3>Agendamentos</h3>
+            <table id="agendamentos"></table>
+        </div>
+    </div>
+</body>
+
+</html>
