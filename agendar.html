@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agendamento Barbearia</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            background-color: #121212;
+            color: #FFD700;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .box {
+            background: #1E1E1E;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 0 20px rgba(255, 215, 0, 0.6);
+            width: 100%;
+            max-width: 500px;
+        }
+
+        h3 {
+            border-bottom: 2px solid #FFD700;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+
+        input,
+        select {
+            margin: 12px auto;
+            padding: 12px;
+            width: 100%;
+            max-width: 400px;
+            border-radius: 6px;
+            border: 1px solid #FFD700;
+            background-color: #1E1E1E;
+            color: #FFD700;
+            font-size: 16px;
+            text-align: center;
+            outline: none;
+        }
+
+        input::placeholder {
+            color: #FFD700;
+            opacity: 0.7;
+        }
+
+        .btn {
+            background-color: #FFD700;
+            color: #121212;
+            font-weight: bold;
+            cursor: pointer;
+            padding: 12px 20px;
+            border-radius: 6px;
+            font-size: 16px;
+            border: none;
+            transition: 0.3s;
+            margin-top: 10px;
+            width: 100%;
+            max-width: 400px;
+        }
+
+        .btn:hover {
+            background-color: #c5a300;
+            transform: scale(1.05);
+        }
+    </style>
+
+    <script>
+        async function carregarHorariosDisponiveis() {
+            const profissional = document.getElementById('profissional').value;
+            if (!profissional) return;
+
+            try {
+                const response = await fetch(`http://127.0.0.1:5000/horarios_disponiveis/${profissional}`);
+                if (!response.ok) throw new Error('Erro ao carregar horários disponíveis');
+
+                const horarios = await response.json();
+                const selectHorario = document.getElementById('horario');
+                selectHorario.innerHTML = '<option value="">Selecione um horário</option>';
+
+                horarios.forEach(horario => {
+                    let option = document.createElement('option');
+                    option.value = horario;
+                    option.textContent = horario;
+                    selectHorario.appendChild(option);
+                });
+            } catch (error) {
+                alert(error.message);
+            }
+        }
+
+        async function cadastrarAgendamento() {
+            const nome = document.getElementById('nome').value.trim();
+            const telefone = document.getElementById('telefone').value.trim();
+            const servico = document.getElementById('servico').value;
+            const profissional = document.getElementById('profissional').value;
+            const horario = document.getElementById('horario').value;
+
+            if (!nome || !telefone || !servico || !profissional || !horario) {
+                alert("Preencha todos os campos!");
+                return;
+            }
+
+            try {
+                const response = await fetch('http://127.0.0.1:5000/agendamentos', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ nome, telefone, servico, profissional, horario })
+                });
+
+                const resultado = await response.json();
+                if (response.ok) {
+                    alert("Agendamento realizado com sucesso!");
+                    window.location.href = 'agendamentos.html';
+                } else {
+                    alert(resultado.erro || "Erro ao realizar agendamento.");
+                }
+            } catch (error) {
+                alert("Erro de conexão com o servidor.");
+            }
+        }
+    </script>
+</head>
+
+<body>
+    <div class="container">
+        <div class="form-container box">
+            <h3>Agendar Horário</h3>
+            <input type="text" id="nome" placeholder="Nome">
+            <input type="text" id="telefone" placeholder="Telefone">
+            <select id="servico">
+                <option value="">Selecione um serviço</option>
+                <option value="Corte">Corte</option>
+                <option value="Barba">Barba</option>
+                <option value="Corte + Barba">Corte + Barba</option>
+            </select>
+            <select id="profissional" onchange="carregarHorariosDisponiveis()">
+                <option value="">Selecione um profissional</option>
+                <option value="João">João</option>
+                <option value="Carlos">Carlos</option>
+                <option value="Marcos">Marcos</option>
+            </select>
+            <select id="horario">
+                <option value="">Selecione um horário</option>
+            </select>
+            <button class="btn" onclick="cadastrarAgendamento()">Agendar</button>
+        </div>
+    </div>
+</body>
+
+</html>

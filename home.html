@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Painel - Barbearia</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #121212;
+            color: #FFD700;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 20px;
+            max-width: 1200px;
+            margin: auto;
+        }
+
+        .box {
+            background: #1E1E1E;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 15px rgba(255, 215, 0, 0.7);
+            width: 100%;
+            max-width: 500px;
+            text-align: center;
+            position: relative;
+        }
+
+        h3 {
+            border-bottom: 2px solid #FFD700;
+            padding-bottom: 10px;
+        }
+
+        .btn {
+            display: block;
+            background-color: #FFD700;
+            color: #121212;
+            font-weight: bold;
+            text-decoration: none;
+            padding: 10px;
+            margin-top: 10px;
+            border-radius: 5px;
+            transition: 0.3s;
+        }
+
+        .btn:hover {
+            background-color: #c5a300;
+            transform: scale(1.05);
+        }
+
+        .icon {
+            font-size: 30px;
+            margin-bottom: 10px;
+        }
+
+        .badge {
+            background: #FFD700;
+            color: #121212;
+            font-weight: bold;
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 14px;
+            position: absolute;
+            top: 15px;
+            right: 15px;
+        }
+
+        .status-box {
+            background-color: #292929;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            box-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+        }
+
+        .status-box strong {
+            color: #FFD700;
+        }
+    </style>
+</head>
+
+<body>
+    <h1 style="text-align:center; margin-bottom: 30px;">Painel da Barbearia</h1>
+
+    <div class="container">
+
+        <div class="box">
+            <div class="icon"><i class="fas fa-calendar-plus"></i></div>
+            <h3>Agendar</h3>
+            <a href="agendar.html" class="btn">Ir para Agendamento</a>
+        </div>
+
+        <div class="box">
+            <div class="icon"><i class="fas fa-users"></i></div>
+            <h3>Fila de Espera</h3>
+            <span id="badgeFila" class="badge">0</span>
+            <a href="fila.html" class="btn">Ver Fila de Espera</a>
+        </div>
+
+        <div class="box">
+            <div class="icon"><i class="fas fa-clipboard-list"></i></div>
+            <h3>Agendamentos do Dia</h3>
+            <span id="badgeAgendamentos" class="badge">0</span>
+            <a href="agendamentos.html" class="btn">Ver Agendamentos</a>
+        </div>
+    </div>
+
+    <div class="container" style="margin-top: 40px;">
+        <div class="box" style="max-width: 1000px;">
+            <div class="status-box">
+                <h3>Próximo Atendimento</h3>
+                <p id="proximoAtendimento">Carregando...</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        async function carregarInformacoes() {
+            try {
+                const filaResp = await fetch('http://127.0.0.1:5000/fila_total');
+                const filaDados = await filaResp.json();
+                document.getElementById('badgeFila').textContent = filaDados.total;
+
+                const agendResp = await fetch('http://127.0.0.1:5000/agendamentos_total');
+                const agendDados = await agendResp.json();
+                document.getElementById('badgeAgendamentos').textContent = agendDados.total;
+
+                const proxResp = await fetch('http://127.0.0.1:5000/proximo_atendimento');
+                const proxDados = await proxResp.json();
+
+                if (proxDados && proxDados.nome) {
+                    document.getElementById('proximoAtendimento').innerHTML = `
+                        <strong>Cliente:</strong> ${proxDados.nome} <br>
+                        <strong>Profissional:</strong> ${proxDados.profissional} <br>
+                        <strong>Horário:</strong> ${proxDados.horario}
+                    `;
+                } else {
+                    document.getElementById('proximoAtendimento').textContent = "Nenhum atendimento agendado.";
+                }
+            } catch (error) {
+                console.error("Erro ao carregar informações do painel", error);
+            }
+        }
+
+        carregarInformacoes();
+    </script>
+</body>
+
+</html>

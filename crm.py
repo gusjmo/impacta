@@ -1,6 +1,7 @@
 from flask import Flask, request, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from flask_cors import CORS
+from datetime import datetime
 
 app = Flask(__name__)
 CORS(app)
@@ -64,6 +65,56 @@ def listar_horarios_disponiveis(profissional):
     horarios_ocupados = [a.horario for a in Agendamento.query.filter_by(profissional=profissional).all()]
     horarios_disponiveis = [h for h in horarios_fixos if h not in horarios_ocupados]
     return jsonify(horarios_disponiveis)
+
+@app.route('/fila_cliente', methods=['GET'])
+def fila_cliente():
+    nome_cliente = request.args.get('nome')
+    
+    if not nome_cliente:
+        return jsonify({'erro': 'Nome do cliente não informado!'}), 400
+
+    agendamento = Agendamento.query.filter(Agendamento.nome.ilike(nome_cliente)).first()
+    
+    if not agendamento:
+        return jsonify({'erro': 'Agendamento não encontrado para esse nome'}), 404
+
+    agendamentos = sorted(
+        Agendamento.query.filter_by(profissional=agendamento.profissional).all(),
+        key=lambda x: datetime.strptime(x.horario, '%H:%M')
+    )
+
+    horarios_ordenados = [a.horario for a in agendamentos]
+    posicao = horarios_ordenados.index(agendamento.horario)
+    pessoas_faltando = len(horarios_ordenados) - (posicao + 1)
+    tempo_estimado = posicao * 40
+
+    return jsonify({
+        'posicao': posicao,
+        'pessoas_na_frente': posicao,
+        'tempo_estimado_minutos': tempo_estimado
+    })
+
+@app.route('/fila_total', methods=['GET'])
+def fila_total():
+    total = Agendamento.query.count()
+    return jsonify({'total': total})
+
+@app.route('/agendamentos_total', methods=['GET'])
+def agendamentos_total():
+    total = Agendamento.query.count()
+    return jsonify({'total': total})
+
+@app.route('/proximo_atendimento', methods=['GET'])
+def proximo_atendimento():
+    agendamentos = Agendamento.query.order_by(Agendamento.horario).all()
+    if not agendamentos:
+        return jsonify({})
+    proximo = agendamentos[0]
+    return jsonify({
+        'nome': proximo.nome,
+        'profissional': proximo.profissional,
+        'horario': proximo.horario
+    })
 
 if __name__ == '__main__':
     try:
