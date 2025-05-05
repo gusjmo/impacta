@@ -15,8 +15,11 @@ class Agendamento(db.Model):
     servico = db.Column(db.String(50), nullable=False)
     profissional = db.Column(db.String(50), nullable=False)
     horario = db.Column(db.String(10), nullable=False)
+    pago = db.Column(db.Boolean, default=False)  # Campo novo
 
-    __table_args__ = (db.UniqueConstraint('profissional', 'horario', name='unique_profissional_horario'),)
+    __table_args__ = (
+        db.UniqueConstraint('profissional', 'horario', name='unique_profissional_horario'),
+    )
 
 def criar_banco():
     with app.app_context():
@@ -25,16 +28,34 @@ def criar_banco():
 @app.route('/agendamentos', methods=['GET'])
 def listar_agendamentos():
     agendamentos = Agendamento.query.all()
-    return jsonify([{ 'id': a.id, 'nome': a.nome, 'telefone': a.telefone, 'servico': a.servico, 'profissional': a.profissional, 'horario': a.horario } for a in agendamentos])
+    return jsonify([
+        {
+            'id': a.id,
+            'nome': a.nome,
+            'telefone': a.telefone,
+            'servico': a.servico,
+            'profissional': a.profissional,
+            'horario': a.horario,
+            'pago': a.pago
+        } for a in agendamentos
+    ])
 
 @app.route('/agendamentos', methods=['POST'])
 def cadastrar_agendamento():
     dados = request.json
-    conflito = Agendamento.query.filter_by(horario=dados['horario'], profissional=dados['profissional']).first()
+    conflito = Agendamento.query.filter_by(
+        horario=dados['horario'],
+        profissional=dados['profissional']
+    ).first()
     if conflito:
         return jsonify({'erro': 'Horário já agendado para este profissional!'}), 400
+
     novo_agendamento = Agendamento(
-        nome=dados['nome'], telefone=dados['telefone'], servico=dados['servico'], profissional=dados['profissional'], horario=dados['horario']
+        nome=dados['nome'],
+        telefone=dados['telefone'],
+        servico=dados['servico'],
+        profissional=dados['profissional'],
+        horario=dados['horario']
     )
     db.session.add(novo_agendamento)
     db.session.commit()
@@ -49,32 +70,22 @@ def deletar_agendamento(id):
     db.session.commit()
     return jsonify({'mensagem': 'Agendamento excluído com sucesso!'})
 
-@app.route('/agendamentos/delete_multiple', methods=['POST'])
-def deletar_agendamentos():
-    dados = request.json
-    ids = dados.get('ids', [])
-    if not ids:
-        return jsonify({'erro': 'Nenhum agendamento selecionado para exclusão!'}), 400
-    Agendamento.query.filter(Agendamento.id.in_(ids)).delete(synchronize_session=False)
+@app.route('/agendamentos/<int:id>/pagar', methods=['PUT'])
+def confirmar_pagamento(id):
+    agendamento = Agendamento.query.get(id)
+    if not agendamento:
+        return jsonify({'erro': 'Agendamento não encontrado!'}), 404
+    agendamento.pago = True
     db.session.commit()
-    return jsonify({'mensagem': 'Agendamentos excluídos com sucesso!'})
-
-@app.route('/horarios_disponiveis/<profissional>', methods=['GET'])
-def listar_horarios_disponiveis(profissional):
-    horarios_fixos = ['08:00', '08:40', '09:20', '10:00', '10:40', '11:20', '13:00', '13:40', '14:20', '15:00']
-    horarios_ocupados = [a.horario for a in Agendamento.query.filter_by(profissional=profissional).all()]
-    horarios_disponiveis = [h for h in horarios_fixos if h not in horarios_ocupados]
-    return jsonify(horarios_disponiveis)
+    return jsonify({'mensagem': 'Pagamento confirmado com sucesso!'})
 
 @app.route('/fila_cliente', methods=['GET'])
 def fila_cliente():
     nome_cliente = request.args.get('nome')
-    
     if not nome_cliente:
         return jsonify({'erro': 'Nome do cliente não informado!'}), 400
 
     agendamento = Agendamento.query.filter(Agendamento.nome.ilike(nome_cliente)).first()
-    
     if not agendamento:
         return jsonify({'erro': 'Agendamento não encontrado para esse nome'}), 404
 
@@ -83,9 +94,7 @@ def fila_cliente():
         key=lambda x: datetime.strptime(x.horario, '%H:%M')
     )
 
-    horarios_ordenados = [a.horario for a in agendamentos]
-    posicao = horarios_ordenados.index(agendamento.horario)
-    pessoas_faltando = len(horarios_ordenados) - (posicao + 1)
+    posicao = next((i for i, a in enumerate(agendamentos) if a.id == agendamento.id), -1)
     tempo_estimado = posicao * 40
 
     return jsonify({
@@ -93,6 +102,13 @@ def fila_cliente():
         'pessoas_na_frente': posicao,
         'tempo_estimado_minutos': tempo_estimado
     })
+
+@app.route('/horarios_disponiveis/<profissional>', methods=['GET'])
+def listar_horarios_disponiveis(profissional):
+    horarios_fixos = ['08:00', '08:40', '09:20', '10:00', '10:40', '11:20', '13:00', '13:40', '14:20', '15:00']
+    horarios_ocupados = [a.horario for a in Agendamento.query.filter_by(profissional=profissional).all()]
+    horarios_disponiveis = [h for h in horarios_fixos if h not in horarios_ocupados]
+    return jsonify(horarios_disponiveis)
 
 @app.route('/fila_total', methods=['GET'])
 def fila_total():

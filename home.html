@@ -152,6 +152,11 @@
         }
 
         carregarInformacoes();
+
+        let pagamentoBotao = agendamento.pago
+            ? `<span class="${pagamentoClass}">${pagamentoStatus}</span>`
+            : `<button onclick="irParaPagamento(${agendamento.id})" class="${btnPagamento}">Confirmar Pagamento</button>`;
+
     </script>
 </body>
 

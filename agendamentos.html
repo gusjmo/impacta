@@ -72,7 +72,26 @@
             background-color: #c5a300;
             transform: scale(1.05);
         }
+
+        #qr-code-container {
+            margin-top: 20px;
+        }
+
+        #qr-code {
+            margin-top: 20px;
+        }
+
+        .confirmacao-pagamento {
+            display: none;
+            color: lightgreen;
+            margin-top: 20px;
+            font-weight: bold;
+        }
     </style>
+
+    <!-- QR Code Library -->
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
+
     <script>
         let agendamentos = [];
 
@@ -88,8 +107,26 @@
                     tabela.innerHTML += '<tr><td colspan="6">Nenhum agendamento encontrado.</td></tr>';
                 } else {
                     agendamentos.forEach(agendamento => {
+                        let acao = `
+                            <button onclick="deletarAgendamento(${agendamento.id})" class="btn">Excluir</button>
+                        `;
+                        if (!agendamento.pago) {
+                            acao += `
+                                <button onclick="gerarQRCodePagamento(${agendamento.id})" class="btn" style="margin-left: 5px;">Gerar QR Code de Pagamento</button>
+                            `;
+                        } else {
+                            acao += `<span style="color: lightgreen; margin-left: 10px;">Pago</span>`;
+                        }
+
                         let row = tabela.insertRow();
-                        row.innerHTML = `<td>${agendamento.nome}</td><td>${agendamento.telefone}</td><td>${agendamento.servico}</td><td>${agendamento.profissional}</td><td>${agendamento.horario}</td><td><button onclick="deletarAgendamento(${agendamento.id})" class="btn">Excluir</button></td>`;
+                        row.innerHTML = `
+                            <td>${agendamento.nome}</td>
+                            <td>${agendamento.telefone}</td>
+                            <td>${agendamento.servico}</td>
+                            <td>${agendamento.profissional}</td>
+                            <td>${agendamento.horario}</td>
+                            <td>${acao}</td>
+                        `;
                     });
                 }
             } catch (error) {
@@ -119,6 +156,54 @@
                 alert("Erro de conexão com o servidor.");
             }
         }
+
+        function gerarQRCodePagamento(id) {
+            const senha = prompt("Digite a senha de administrador para gerar o QR Code de pagamento: ");
+            if (senha !== "admin1") {
+                alert("Senha incorreta!");
+                return;
+            }
+
+            // Gerar o QR Code com a URL do pagamento
+            const urlPagamento = `http://127.0.0.1:5000/pagamento/${id}`;  // Substitua pela URL correta
+            const qrCodeContainer = document.getElementById('qr-code-container');
+            const qrCodeElement = document.getElementById('qr-code');
+            const confirmacaoPagamento = document.getElementById('confirmacao-pagamento');
+
+            // Apagar qualquer QR Code anterior
+            qrCodeElement.innerHTML = '';
+            qrCodeContainer.style.display = 'block';
+            confirmacaoPagamento.style.display = 'none';  // Esconde a mensagem de pagamento
+
+            // Gerar o QR Code
+            QRCode.toCanvas(qrCodeElement, urlPagamento, function (error) {
+                if (error) {
+                    console.error(error);
+                }
+            });
+
+            // Simula a confirmação de pagamento após 3 segundos
+            setTimeout(function () {
+                confirmacaoPagamento.style.display = 'block';  // Exibe a mensagem de confirmação
+                atualizarStatusPagamento(id);  // Atualiza o status para "Pago"
+            }, 3000);  // 3 segundos de delay
+        }
+
+        function atualizarStatusPagamento(id) {
+            // Atualiza o status para "Pago" após a confirmação do pagamento
+            const tabela = document.getElementById('agendamentos');
+            const rows = tabela.rows;
+
+            for (let i = 1; i < rows.length; i++) {
+                const row = rows[i];
+                const agendamentoId = agendamentos[i - 1].id;
+
+                if (agendamentoId === id) {
+                    const statusCell = row.cells[5];  // A célula da ação
+                    statusCell.innerHTML = '<span style="color: lightgreen;">Pago</span>';
+                }
+            }
+        }
     </script>
 </head>
 
@@ -127,6 +212,17 @@
         <div class="table-container box">
             <h3>Agendamentos</h3>
             <table id="agendamentos"></table>
+        </div>
+
+        <!-- Container para exibir o QR Code -->
+        <div id="qr-code-container" style="display: none;">
+            <h3>QR Code para o Pagamento</h3>
+            <canvas id="qr-code"></canvas>
+        </div>
+
+        <!-- Mensagem de Confirmação de Pagamento -->
+        <div id="confirmacao-pagamento" class="confirmacao-pagamento">
+            Pagamento confirmado com sucesso!
         </div>
     </div>
 </body>
