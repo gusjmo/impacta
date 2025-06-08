@@ -82,62 +82,96 @@
             transform: scale(1.05);
         }
     </style>
+</head>
+<!-- Botão Flutuante do WhatsApp -->
+<a href="https://wa.me/5511971707063?text=Ol%C3%A1%2C%20tenho%20uma%20d%C3%BAvida.%20Pode%20me%20ajudar%3F"
+    class="whatsapp-float" target="_blank" title="Fale conosco no WhatsApp">
+    <img src="https://cdn-icons-png.flaticon.com/512/733/733585.png" alt="WhatsApp" />
+</a>
 
-    <script>
-        async function carregarHorariosDisponiveis() {
-            const profissional = document.getElementById('profissional').value;
-            if (!profissional) return;
+<style>
+    .whatsapp-float {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        z-index: 1000;
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        background-color: #25D366;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+        transition: transform 0.3s;
+    }
 
-            try {
-                const response = await fetch(`http://127.0.0.1:5000/horarios_disponiveis/${profissional}`);
-                if (!response.ok) throw new Error('Erro ao carregar horários disponíveis');
+    .whatsapp-float:hover {
+        transform: scale(1.1);
+    }
 
-                const horarios = await response.json();
-                const selectHorario = document.getElementById('horario');
-                selectHorario.innerHTML = '<option value="">Selecione um horário</option>';
+    .whatsapp-float img {
+        width: 35px;
+        height: 35px;
+    }
+</style>
 
-                horarios.forEach(horario => {
-                    let option = document.createElement('option');
-                    option.value = horario;
-                    option.textContent = horario;
-                    selectHorario.appendChild(option);
-                });
-            } catch (error) {
-                alert(error.message);
-            }
+
+<script>
+    async function carregarHorariosDisponiveis() {
+        const profissional = document.getElementById('profissional').value;
+        if (!profissional) return;
+
+        try {
+            const response = await fetch(`http://127.0.0.1:5000/horarios_disponiveis/${profissional}`);
+            if (!response.ok) throw new Error('Erro ao carregar horários disponíveis');
+
+            const horarios = await response.json();
+            const selectHorario = document.getElementById('horario');
+            selectHorario.innerHTML = '<option value="">Selecione um horário</option>';
+
+            horarios.forEach(horario => {
+                let option = document.createElement('option');
+                option.value = horario;
+                option.textContent = horario;
+                selectHorario.appendChild(option);
+            });
+        } catch (error) {
+            alert(error.message);
+        }
+    }
+
+    async function cadastrarAgendamento() {
+        const nome = document.getElementById('nome').value.trim();
+        const telefone = document.getElementById('telefone').value.trim();
+        const servico = document.getElementById('servico').value;
+        const profissional = document.getElementById('profissional').value;
+        const horario = document.getElementById('horario').value;
+
+        if (!nome || !telefone || !servico || !profissional || !horario) {
+            alert("Preencha todos os campos!");
+            return;
         }
 
-        async function cadastrarAgendamento() {
-            const nome = document.getElementById('nome').value.trim();
-            const telefone = document.getElementById('telefone').value.trim();
-            const servico = document.getElementById('servico').value;
-            const profissional = document.getElementById('profissional').value;
-            const horario = document.getElementById('horario').value;
+        try {
+            const response = await fetch('http://127.0.0.1:5000/agendamentos', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ nome, telefone, servico, profissional, horario })
+            });
 
-            if (!nome || !telefone || !servico || !profissional || !horario) {
-                alert("Preencha todos os campos!");
-                return;
+            const resultado = await response.json();
+            if (response.ok) {
+                alert("Agendamento realizado com sucesso!");
+                window.location.href = 'agendamentos.html';
+            } else {
+                alert(resultado.erro || "Erro ao realizar agendamento.");
             }
-
-            try {
-                const response = await fetch('http://127.0.0.1:5000/agendamentos', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ nome, telefone, servico, profissional, horario })
-                });
-
-                const resultado = await response.json();
-                if (response.ok) {
-                    alert("Agendamento realizado com sucesso!");
-                    window.location.href = 'agendamentos.html';
-                } else {
-                    alert(resultado.erro || "Erro ao realizar agendamento.");
-                }
-            } catch (error) {
-                alert("Erro de conexão com o servidor.");
-            }
+        } catch (error) {
+            alert("Erro de conexão com o servidor.");
         }
-    </script>
+    }
+</script>
 </head>
 
 <body>

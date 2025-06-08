@@ -87,6 +87,39 @@
         }
     </style>
 </head>
+<!-- Botão Flutuante do WhatsApp -->
+<a href="https://wa.me/5511971707063?text=Ol%C3%A1%2C%20tenho%20uma%20d%C3%BAvida.%20Pode%20me%20ajudar%3F"
+    class="whatsapp-float" target="_blank" title="Fale conosco no WhatsApp">
+    <img src="https://cdn-icons-png.flaticon.com/512/733/733585.png" alt="WhatsApp" />
+</a>
+
+<style>
+    .whatsapp-float {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        z-index: 1000;
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        background-color: #25D366;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+        transition: transform 0.3s;
+    }
+
+    .whatsapp-float:hover {
+        transform: scale(1.1);
+    }
+
+    .whatsapp-float img {
+        width: 35px;
+        height: 35px;
+    }
+</style>
+
 
 <body>
     <h1 style="text-align:center; margin-bottom: 30px;">Painel da Barbearia</h1>
