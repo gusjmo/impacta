@@ -2,6 +2,10 @@
     "version": 2,
     "builds": [
         {
+            "src": "static/**/*",
+            "use": "@vercel/static"
+        },
+        {
             "src": "crm.py",
             "use": "@vercel/python"
         }
@@ -13,7 +17,7 @@
         },
         {
             "src": "/(.*)",
-            "dest": "crm.py"
+            "dest": "/crm.py"
         }
     ]
 }
