@@ -1,0 +1,64 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h2 class="page-title">Fila de Atendimento</h2>
+
+<div class="glass-box" style="max-width: 600px; margin: auto;">
+    <h3 style="color: var(--neon-gold);"><i class="fas fa-search"></i> Consultar Posição</h3>
+    <p style="color: #94a3b8; font-size: 14px; margin-bottom: 20px;">
+        Digite seu nome exatamente como no agendamento para verificar sua posição na fila do seu barbeiro.
+    </p>
+
+    <div style="text-align: left;">
+        <label style="font-size: 14px; color: #94a3b8; margin-left: 5px;">Nome do Cliente</label>
+        <input type="text" id="nomeCliente" placeholder="Ex: Gustavo Silva">
+    </div>
+
+    <button class="btn-gold" onclick="consultarPosicao()" style="margin-top: 15px;">
+        <i class="fas fa-search"></i> Consultar
+    </button>
+
+    <div id="resultado" style="margin-top: 30px; font-size: 16px; display: none;">
+        <!-- Resultado será injetado aqui -->
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    async function consultarPosicao() {
+        const nomeCliente = document.getElementById("nomeCliente").value.trim();
+        const resultadoDiv = document.getElementById("resultado");
+
+        if (!nomeCliente) {
+            alert("⚠️ Por favor, insira o seu nome.");
+            return;
+        }
+
+        resultadoDiv.style.display = "block";
+        resultadoDiv.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Pesquisando...';
+
+        try {
+            const response = await fetch(`/fila_cliente?nome=${encodeURIComponent(nomeCliente)}`);
+            const dados = await response.json();
+
+            if (response.ok) {
+                const { posicao, tempo_estimado_minutos } = dados;
+
+                resultadoDiv.innerHTML = `
+                    <div style="background: rgba(255, 215, 0, 0.1); padding: 20px; border-radius: 8px; border: 1px solid var(--neon-gold);">
+                        <p style="margin-bottom: 10px;"><strong><i class="fas fa-user"></i> Cliente:</strong> <span style="color: white">${nomeCliente}</span></p>
+                        <p style="margin-bottom: 10px;"><strong><i class="fas fa-list-ol"></i> Posição na fila:</strong> <span style="color: var(--neon-gold); font-size: 20px; font-weight: bold;">${posicao + 1}º</span></p>
+                        <p style="margin-bottom: 10px;"><strong><i class="fas fa-users"></i> Pessoas na sua frente:</strong> <span style="color: white">${posicao}</span></p>
+                        <p style="margin-bottom: 0;"><strong><i class="fas fa-clock"></i> Tempo estimado:</strong> <span style="color: white">${tempo_estimado_minutos} minutos</span></p>
+                    </div>
+                `;
+            } else {
+                resultadoDiv.innerHTML = `<p style="color: #ef4444;"><i class="fas fa-exclamation-circle"></i> ${dados.erro}</p>`;
+            }
+        } catch (error) {
+            resultadoDiv.innerHTML = `<p style="color: #ef4444;"><i class="fas fa-times-circle"></i> Erro ao consultar a posição na fila. Tente novamente.</p>`;
+        }
+    }
+</script>
+{% endblock %}

@@ -1,0 +1,257 @@
+/* Configurações Globais */
+:root {
+    --bg-dark: #0f172a; /* Slate Dark */
+    --box-bg: rgba(30, 41, 59, 0.7); /* Slate 800 com opacidade */
+    --neon-gold: #FFD700;
+    --gold-hover: #e6c200;
+    --text-light: #e2e8f0;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Poppins', sans-serif;
+}
+
+body {
+    background-color: var(--bg-dark);
+    color: var(--text-light);
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+/* Navbar Premium */
+.navbar {
+    background: rgba(15, 23, 42, 0.9);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid rgba(255, 215, 0, 0.2);
+    padding: 15px 0;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+}
+
+.nav-container {
+    max-width: 1200px;
+    margin: auto;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 20px;
+}
+
+.logo {
+    font-weight: 700;
+    font-size: 24px;
+    color: white;
+}
+
+.highlight {
+    color: var(--neon-gold);
+}
+
+.nav-links {
+    list-style: none;
+    display: flex;
+    gap: 20px;
+}
+
+.nav-links li a {
+    color: var(--text-light);
+    text-decoration: none;
+    font-weight: 600;
+    transition: 0.3s;
+}
+
+.nav-links li a:hover {
+    color: var(--neon-gold);
+}
+
+/* Base de Conteúdo */
+.main-content {
+    flex: 1;
+    padding: 40px 20px;
+    max-width: 1200px;
+    margin: auto;
+    width: 100%;
+}
+
+h2.page-title {
+    text-align: center;
+    color: var(--neon-gold);
+    margin-bottom: 30px;
+    font-size: 28px;
+    font-weight: 700;
+}
+
+/* Cards (Glassmorphism) */
+.glass-box {
+    background: var(--box-bg);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 215, 0, 0.1);
+    padding: 30px;
+    border-radius: 12px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    text-align: center;
+    position: relative;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.glass-box:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 32px rgba(255, 215, 0, 0.2);
+}
+
+.box-icon {
+    font-size: 40px;
+    color: var(--neon-gold);
+    margin-bottom: 15px;
+}
+
+.glass-box h3 {
+    border-bottom: 1px solid rgba(255, 215, 0, 0.3);
+    padding-bottom: 10px;
+    margin-bottom: 20px;
+    font-weight: 600;
+}
+
+/* Botões Customizados */
+.btn-gold {
+    display: inline-block;
+    background: linear-gradient(135deg, var(--neon-gold), #b89600);
+    color: #121212;
+    font-weight: 700;
+    text-decoration: none;
+    padding: 12px 24px;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    width: 100%;
+    margin-top: 15px;
+    text-transform: uppercase;
+    font-size: 14px;
+    box-shadow: 0 4px 15px rgba(255, 215, 0, 0.3);
+}
+
+.btn-gold:hover {
+    background: linear-gradient(135deg, var(--gold-hover), #997a00);
+    transform: scale(1.03);
+    box-shadow: 0 6px 20px rgba(255, 215, 0, 0.5);
+}
+
+.btn-danger {
+    background: linear-gradient(135deg, #ef4444, #b91c1c);
+    color: white;
+    cursor: pointer;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 6px;
+    font-weight: bold;
+    transition: 0.3s;
+}
+.btn-danger:hover { background: #991b1b; }
+
+/* Badges e Status */
+.badge {
+    background: var(--neon-gold);
+    color: #000;
+    font-weight: bold;
+    padding: 5px 12px;
+    border-radius: 20px;
+    font-size: 14px;
+    position: absolute;
+    top: -10px;
+    right: -10px;
+    box-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+}
+
+/* Formulários */
+input, select {
+    width: 100%;
+    padding: 12px;
+    margin: 10px 0;
+    border-radius: 8px;
+    border: 1px solid rgba(255, 215, 0, 0.5);
+    background: rgba(15, 23, 42, 0.5);
+    color: var(--text-light);
+    font-size: 16px;
+    outline: none;
+    transition: 0.3s;
+}
+
+input:focus, select:focus {
+    border-color: var(--neon-gold);
+    box-shadow: 0 0 8px rgba(255, 215, 0, 0.4);
+}
+
+/* Tabelas Premium */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+    background: rgba(30, 41, 59, 0.4);
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+th, td {
+    padding: 12px;
+    text-align: center;
+    border-bottom: 1px solid rgba(255, 215, 0, 0.1);
+}
+
+th {
+    background-color: rgba(255, 215, 0, 0.1);
+    color: var(--neon-gold);
+    font-weight: 600;
+}
+
+tr:hover {
+    background-color: rgba(255, 215, 0, 0.05);
+}
+
+/* Footer */
+.footer {
+    text-align: center;
+    padding: 20px;
+    background: #0b1120;
+    font-size: 14px;
+    color: #64748b;
+    border-top: 1px solid rgba(255, 215, 0, 0.1);
+}
+
+/* WhatsApp Float */
+.whatsapp-float {
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    width: 60px;
+    height: 60px;
+    background-color: #25D366;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    box-shadow: 0 4px 15px rgba(37, 211, 102, 0.5);
+    z-index: 1000;
+    transition: 0.3s;
+}
+
+.whatsapp-float img {
+    width: 35px;
+}
+
+.whatsapp-float:hover {
+    transform: scale(1.1) translateY(-5px);
+}
+
+/* Grid Layouts */
+.grid-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 30px;
+    margin-bottom: 40px;
+}

@@ -1,12 +1,29 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, render_template
 from flask_sqlalchemy import SQLAlchemy
 from flask_cors import CORS
 from datetime import datetime
+import os
 
 app = Flask(__name__)
 CORS(app)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://root:3899@localhost/barbearia'
+
+# Configurando para usar SQLite
+if os.environ.get("VERCEL"):
+    # Vercel só permite escrita na pasta /tmp
+    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:////tmp/barbearia.db'
+else:
+    basedir = os.path.abspath(os.path.dirname(__name__))
+    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(basedir, 'barbearia.db')
+
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+
 db = SQLAlchemy(app)
+
+# Como o Vercel não roda o if __name__ == '__main__', precisamos garantir que o banco seja criado
+@app.before_request
+def inicializar_banco():
+    app.before_request_funcs[None].remove(inicializar_banco)
+    db.create_all()
 
 class Agendamento(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -24,6 +41,22 @@ class Agendamento(db.Model):
 def criar_banco():
     with app.app_context():
         db.create_all()
+
+@app.route('/')
+def home():
+    return render_template('home.html')
+
+@app.route('/agendar')
+def agendar():
+    return render_template('agendar.html')
+
+@app.route('/fila')
+def fila():
+    return render_template('fila.html')
+
+@app.route('/agendamentos_view')
+def agendamentos_view():
+    return render_template('agendamentos.html')
 
 @app.route('/agendamentos', methods=['GET'])
 def listar_agendamentos():

@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Barbearia Premium{% endblock %}</title>
+    <!-- Fontes do Google: Poppins -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+
+<body>
+    <!-- Navbar Premium -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <h1 class="logo">
+                <i class="fas fa-cut" style="color: #FFD700; margin-right: 10px;"></i>
+                Barbearia <span class="highlight">GusJmo</span>
+            </h1>
+            <ul class="nav-links">
+                <li><a href="{{ url_for('home') }}">Início</a></li>
+                <li><a href="{{ url_for('agendar') }}">Agendar</a></li>
+                <li><a href="{{ url_for('fila') }}">Fila</a></li>
+                <li><a href="{{ url_for('agendamentos_view') }}">Painel Admin</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Conteúdo Dinâmico das Páginas -->
+    <main class="main-content">
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Botão Flutuante do WhatsApp -->
+    <a href="https://wa.me/5511971707063?text=Ol%C3%A1%2C%20tenho%20uma%20d%C3%BAvida.%20Pode%20me%20ajudar%3F"
+        class="whatsapp-float" target="_blank" title="Fale conosco no WhatsApp">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/5/5e/WhatsApp_icon.png" alt="WhatsApp" />
+    </a>
+
+    <!-- Footer Premium -->
+    <footer class="footer">
+        <p>&copy; 2026 GusJmo - Sistema de Agendamento. Desenvolvido para portfólio.</p>
+    </footer>
+
+    {% block scripts %}{% endblock %}
+</body>
+</html>

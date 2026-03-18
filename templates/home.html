@@ -1,0 +1,70 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h2 class="page-title">Painel de Controle</h2>
+
+<div class="grid-container">
+    <div class="glass-box">
+        <i class="fas fa-calendar-plus box-icon"></i>
+        <h3>Agendar Cliente</h3>
+        <p style="margin-bottom: 15px; font-size: 14px; color: #94a3b8;">Marque um novo horário no sistema.</p>
+        <a href="{{ url_for('agendar') }}" class="btn-gold">Ir para Agendamento</a>
+    </div>
+
+    <div class="glass-box">
+        <span id="badgeFila" class="badge">0</span>
+        <i class="fas fa-users box-icon"></i>
+        <h3>Fila de Espera</h3>
+        <p style="margin-bottom: 15px; font-size: 14px; color: #94a3b8;">Consulte quem é o próximo.</p>
+        <a href="{{ url_for('fila') }}" class="btn-gold">Ver Fila</a>
+    </div>
+
+    <div class="glass-box">
+        <span id="badgeAgendamentos" class="badge">0</span>
+        <i class="fas fa-clipboard-list box-icon"></i>
+        <h3>Agendamentos do Dia</h3>
+        <p style="margin-bottom: 15px; font-size: 14px; color: #94a3b8;">Gestão completa da agenda.</p>
+        <a href="{{ url_for('agendamentos_view') }}" class="btn-gold">Ver Agendamentos</a>
+    </div>
+</div>
+
+<div class="glass-box" style="max-width: 800px; margin: auto; border-color: var(--neon-gold);">
+    <h3 style="color: var(--neon-gold);"><i class="fas fa-bell"></i> Próximo Atendimento</h3>
+    <div id="proximoAtendimento" style="font-size: 18px; padding: 10px;">
+        <i class="fas fa-spinner fa-spin"></i> Carregando...
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    async function carregarInformacoes() {
+        try {
+            const filaResp = await fetch('/fila_total');
+            const filaDados = await filaResp.json();
+            document.getElementById('badgeFila').textContent = filaDados.total;
+
+            const agendResp = await fetch('/agendamentos_total');
+            const agendDados = await agendResp.json();
+            document.getElementById('badgeAgendamentos').textContent = agendDados.total;
+
+            const proxResp = await fetch('/proximo_atendimento');
+            const proxDados = await proxResp.json();
+
+            if (proxDados && proxDados.nome) {
+                document.getElementById('proximoAtendimento').innerHTML = `
+                    <p><strong>Cliente:</strong> <span style="color: white">${proxDados.nome}</span></p>
+                    <p><strong>Profissional:</strong> <span style="color: white">${proxDados.profissional}</span></p>
+                    <p><strong>Horário:</strong> <span style="color: var(--neon-gold); font-size: 22px; font-weight: bold;">${proxDados.horario}</span></p>
+                `;
+            } else {
+                document.getElementById('proximoAtendimento').innerHTML = "<p>Nenhum atendimento agendado para hoje.</p>";
+            }
+        } catch (error) {
+            console.error("Erro ao carregar informações", error);
+        }
+    }
+
+    carregarInformacoes();
+</script>
+{% endblock %}

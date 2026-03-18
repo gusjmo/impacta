@@ -1,0 +1,144 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h2 class="page-title">Painel do Administrador</h2>
+
+<div class="glass-box" style="margin: auto; max-width: 1000px;">
+    <h3 style="color: var(--neon-gold);"><i class="fas fa-list-ul"></i> Todos os Agendamentos</h3>
+    
+    <div style="overflow-x: auto;">
+        <table id="agendamentos">
+            <!-- A tabela será preenchida via JavaScript -->
+        </table>
+    </div>
+
+    <!-- Container para exibir o QR Code -->
+    <div id="qr-code-container" style="display: none; margin-top: 30px; text-align: center; background: rgba(0,0,0,0.5); padding: 20px; border-radius: 12px; border: 1px solid var(--neon-gold);">
+        <h3 style="color: white;"><i class="fas fa-qrcode"></i> QR Code para Pagamento PIX</h3>
+        <canvas id="qr-code" style="background: white; padding: 10px; border-radius: 8px; margin-top: 15px;"></canvas>
+    </div>
+
+    <!-- Mensagem de Confirmação de Pagamento -->
+    <div id="confirmacao-pagamento" class="confirmacao-pagamento" style="display: none; color: #4ade80; margin-top: 20px; font-weight: bold; font-size: 18px;">
+        <i class="fas fa-check-circle"></i> Pagamento confirmado com sucesso!
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<!-- QR Code Library -->
+<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
+
+<script>
+    let agendamentos = [];
+
+    async function carregarAgendamentos() {
+        try {
+            const response = await fetch('/agendamentos');
+            if (!response.ok) throw new Error('Erro ao carregar agendamentos');
+            agendamentos = await response.json();
+            
+            const tabela = document.getElementById('agendamentos');
+            tabela.innerHTML = `
+                <tr>
+                    <th>Cliente</th>
+                    <th>Telefone</th>
+                    <th>Serviço</th>
+                    <th>Barbeiro</th>
+                    <th>Horário</th>
+                    <th>Ações Administrativas</th>
+                </tr>
+            `;
+
+            if (agendamentos.length === 0) {
+                tabela.innerHTML += '<tr><td colspan="6" style="padding: 30px; color: #94a3b8;">Nenhum agendamento encontrado no sistema.</td></tr>';
+            } else {
+                agendamentos.forEach(agendamento => {
+                    let acao = `<button onclick="deletarAgendamento(${agendamento.id})" class="btn-danger" title="Cancelar Agendamento"><i class="fas fa-trash"></i> Cancelar</button>`;
+                    
+                    if (!agendamento.pago) {
+                        acao += `<button onclick="gerarQRCodePagamento(${agendamento.id})" class="btn-gold" style="margin-left: 10px; padding: 8px 16px;"><i class="fas fa-qrcode"></i> Cobrar PIX</button>`;
+                    } else {
+                        acao += `<span style="color: #4ade80; margin-left: 15px; font-weight: bold;"><i class="fas fa-check"></i> Pago</span>`;
+                    }
+
+                    let row = tabela.insertRow();
+                    row.innerHTML = `
+                        <td style="font-weight: bold; color: white;">${agendamento.nome}</td>
+                        <td>${agendamento.telefone}</td>
+                        <td>${agendamento.servico}</td>
+                        <td><span style="background: rgba(255, 215, 0, 0.2); padding: 5px 10px; border-radius: 12px; font-size: 12px; color: var(--neon-gold);">${agendamento.profissional}</span></td>
+                        <td style="font-weight: bold; font-size: 16px;">${agendamento.horario}</td>
+                        <td>${acao}</td>
+                    `;
+                });
+            }
+        } catch (error) {
+            alert(error.message);
+        }
+    }
+
+    async function deletarAgendamento(id) {
+        const senha = prompt("🔒 Área restrita. Digite a senha de administrador (admin1): ");
+        if (senha !== "admin1") {
+            alert("❌ Senha incorreta!");
+            return;
+        }
+        if (!confirm("⚠️ Tem certeza que deseja cancelar este agendamento?")) return;
+        
+        try {
+            const response = await fetch(`/agendamentos/${id}`, { method: 'DELETE' });
+            const resultado = await response.json();
+            if (response.ok) {
+                alert("✅ Agendamento excluído com sucesso!");
+                carregarAgendamentos();
+            } else {
+                alert("❌ " + (resultado.erro || "Erro ao excluir."));
+            }
+        } catch (error) {
+            alert("❌ Erro de conexão com o servidor.");
+        }
+    }
+
+    function gerarQRCodePagamento(id) {
+        const senha = prompt("🔒 Área restrita. Digite a senha de administrador para faturar (admin1): ");
+        if (senha !== "admin1") {
+            alert("❌ Senha incorreta!");
+            return;
+        }
+
+        const urlPagamento = `http://127.0.0.1:5000/pagamento/${id}`; // URL ilustrativa de pagamento 
+        const qrCodeContainer = document.getElementById('qr-code-container');
+        const qrCodeElement = document.getElementById('qr-code');
+        const confirmacaoPagamento = document.getElementById('confirmacao-pagamento');
+
+        qrCodeElement.innerHTML = '';
+        qrCodeContainer.style.display = 'block';
+        confirmacaoPagamento.style.display = 'none';
+
+        // Animação de rolagem para o QR Code
+        qrCodeContainer.scrollIntoView({ behavior: 'smooth' });
+
+        QRCode.toCanvas(qrCodeElement, urlPagamento, function (error) {
+            if (error) console.error(error);
+        });
+
+        // Simulação: Confirma o pagamento automaticamente após 4 segundos para fins de demonstração do portfólio
+        setTimeout(async function () {
+            try {
+                // Chama a rota PUT para atualizar no banco
+                const resp = await fetch(`/agendamentos/${id}/pagar`, { method: 'PUT' });
+                if (resp.ok) {
+                    confirmacaoPagamento.style.display = 'block';
+                    carregarAgendamentos(); 
+                }
+            } catch (err) {
+                console.error("Erro ao confirmar pagamento", err);
+            }
+        }, 4000);  
+    }
+
+    // Carregar ao iniciar a página
+    window.onload = carregarAgendamentos;
+</script>
+{% endblock %}

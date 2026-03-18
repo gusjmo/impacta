@@ -1,0 +1,104 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h2 class="page-title">Agendar Horário</h2>
+
+<div class="glass-box" style="max-width: 500px; margin: auto;">
+    <h3 style="color: var(--neon-gold);"><i class="fas fa-calendar-check"></i> Preencha os Dados</h3>
+    
+    <div style="text-align: left; margin-top: 20px;">
+        <label style="font-size: 14px; color: #94a3b8; margin-left: 5px;">Nome Completo</label>
+        <input type="text" id="nome" placeholder="Seu nome">
+        
+        <label style="font-size: 14px; color: #94a3b8; margin-left: 5px;">Telefone / WhatsApp</label>
+        <input type="text" id="telefone" placeholder="(11) 90000-0000">
+        
+        <label style="font-size: 14px; color: #94a3b8; margin-left: 5px;">Serviço Desejado</label>
+        <select id="servico">
+            <option value="">Selecione um serviço</option>
+            <option value="Corte">Corte Clássico</option>
+            <option value="Barba">Barboterapia</option>
+            <option value="Corte + Barba">Corte + Barba (Combo)</option>
+        </select>
+        
+        <label style="font-size: 14px; color: #94a3b8; margin-left: 5px;">Profissional</label>
+        <select id="profissional" onchange="carregarHorariosDisponiveis()">
+            <option value="">Selecione um profissional</option>
+            <option value="João">Mestre João</option>
+            <option value="Carlos">Carlos Barber</option>
+            <option value="Marcos">Marcos Stylist</option>
+        </select>
+        
+        <label style="font-size: 14px; color: #94a3b8; margin-left: 5px;">Horário</label>
+        <select id="horario">
+            <option value="">Selecione o profissional primeiro...</option>
+        </select>
+        
+        <button class="btn-gold" onclick="cadastrarAgendamento()" style="margin-top: 25px;">
+            <i class="fas fa-check"></i> Confirmar Agendamento
+        </button>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    async function carregarHorariosDisponiveis() {
+        const profissional = document.getElementById('profissional').value;
+        const selectHorario = document.getElementById('horario');
+        
+        if (!profissional) {
+            selectHorario.innerHTML = '<option value="">Selecione o profissional primeiro...</option>';
+            return;
+        }
+
+        try {
+            const response = await fetch(`/horarios_disponiveis/${profissional}`);
+            if (!response.ok) throw new Error('Erro ao carregar horários disponíveis');
+
+            const horarios = await response.json();
+            selectHorario.innerHTML = '<option value="">Selecione um horário disponível</option>';
+
+            horarios.forEach(horario => {
+                let option = document.createElement('option');
+                option.value = horario;
+                option.textContent = horario;
+                selectHorario.appendChild(option);
+            });
+        } catch (error) {
+            alert(error.message);
+        }
+    }
+
+    async function cadastrarAgendamento() {
+        const nome = document.getElementById('nome').value.trim();
+        const telefone = document.getElementById('telefone').value.trim();
+        const servico = document.getElementById('servico').value;
+        const profissional = document.getElementById('profissional').value;
+        const horario = document.getElementById('horario').value;
+
+        if (!nome || !telefone || !servico || !profissional || !horario) {
+            alert("⚠️ Por favor, preencha todos os campos do formulário.");
+            return;
+        }
+
+        try {
+            const response = await fetch('/agendamentos', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ nome, telefone, servico, profissional, horario })
+            });
+
+            const resultado = await response.json();
+            if (response.ok) {
+                alert("✅ Agendamento realizado com sucesso! Te esperamos na barbearia.");
+                window.location.href = "{{ url_for('home') }}";
+            } else {
+                alert("❌ " + (resultado.erro || "Erro ao realizar agendamento."));
+            }
+        } catch (error) {
+            alert("❌ Erro de conexão com o servidor. Tente novamente.");
+        }
+    }
+</script>
+{% endblock %}
