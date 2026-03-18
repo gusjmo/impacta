@@ -251,7 +251,355 @@ tr:hover {
 /* Grid Layouts */
 .grid-container {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
     gap: 30px;
     margin-bottom: 40px;
+}
+
+/* ── Hero Section ───────────────────────────────────────────── */
+.hero-section {
+    text-align: center;
+    padding: 60px 20px 40px;
+    background: radial-gradient(ellipse at center, rgba(255, 215, 0, 0.08) 0%, transparent 70%);
+    border-radius: 20px;
+    margin-bottom: 40px;
+    border: 1px solid rgba(255, 215, 0, 0.08);
+    animation: fadeInUp 0.8s ease;
+}
+
+.hero-icon {
+    font-size: 64px;
+    color: var(--neon-gold);
+    margin-bottom: 20px;
+    display: block;
+    filter: drop-shadow(0 0 20px rgba(255, 215, 0, 0.5));
+    animation: pulse 3s infinite;
+}
+
+.hero-section h1 {
+    font-size: 38px;
+    font-weight: 700;
+    color: white;
+    margin-bottom: 12px;
+}
+
+.hero-section h1 span {
+    color: var(--neon-gold);
+}
+
+.hero-section p {
+    color: #94a3b8;
+    font-size: 16px;
+    max-width: 500px;
+    margin: 0 auto 30px;
+    line-height: 1.6;
+}
+
+.hero-btn {
+    display: inline-block;
+    background: linear-gradient(135deg, var(--neon-gold), #b89600);
+    color: #121212;
+    font-weight: 700;
+    text-decoration: none;
+    padding: 16px 40px;
+    border-radius: 50px;
+    font-size: 16px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    box-shadow: 0 8px 30px rgba(255, 215, 0, 0.4);
+    transition: all 0.3s ease;
+}
+
+.hero-btn:hover {
+    transform: translateY(-3px) scale(1.05);
+    box-shadow: 0 12px 40px rgba(255, 215, 0, 0.6);
+}
+
+/* ── Stepper do Formulário ──────────────────────────────────── */
+.stepper {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 30px;
+    gap: 0;
+}
+
+.step {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    flex: 1;
+    position: relative;
+}
+
+.step::after {
+    content: '';
+    position: absolute;
+    top: 19px;
+    left: 60%;
+    width: 80%;
+    height: 2px;
+    background: rgba(255, 215, 0, 0.2);
+    z-index: 0;
+}
+
+.step:last-child::after { display: none; }
+
+.step-num {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    border: 2px solid rgba(255, 215, 0, 0.3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 14px;
+    color: #94a3b8;
+    background: rgba(15, 23, 42, 0.8);
+    transition: all 0.4s ease;
+    position: relative;
+    z-index: 1;
+}
+
+.step-label {
+    font-size: 11px;
+    color: #64748b;
+    text-align: center;
+    font-weight: 500;
+    transition: all 0.3s;
+}
+
+.step.active .step-num {
+    border-color: var(--neon-gold);
+    color: #121212;
+    background: var(--neon-gold);
+    box-shadow: 0 0 15px rgba(255, 215, 0, 0.5);
+}
+
+.step.active .step-label {
+    color: var(--neon-gold);
+    font-weight: 600;
+}
+
+.step.done .step-num {
+    border-color: #4ade80;
+    background: rgba(74, 222, 128, 0.2);
+    color: #4ade80;
+}
+
+/* Seções do formulário escondidas/visíveis */
+.form-step { display: none; }
+.form-step.active { display: block; animation: fadeInUp 0.4s ease; }
+
+/* ── Animações ──────────────────────────────────────────────── */
+@keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes pulse {
+    0%, 100% { filter: drop-shadow(0 0 20px rgba(255, 215, 0, 0.5)); }
+    50%       { filter: drop-shadow(0 0 35px rgba(255, 215, 0, 0.9)); }
+}
+
+/* ── Login Page ─────────────────────────────────────────────── */
+.login-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 70vh;
+}
+
+.login-box {
+    background: var(--box-bg);
+    border: 1px solid rgba(255, 215, 0, 0.2);
+    border-radius: 16px;
+    padding: 40px;
+    width: 100%;
+    max-width: 400px;
+    text-align: center;
+    backdrop-filter: blur(12px);
+    box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+    animation: fadeInUp 0.6s ease;
+}
+
+.login-box .lock-icon {
+    font-size: 48px;
+    color: var(--neon-gold);
+    margin-bottom: 16px;
+    filter: drop-shadow(0 0 15px rgba(255,215,0,0.4));
+}
+
+/* ── Estado Vazio ───────────────────────────────────────────── */
+.empty-state {
+    text-align: center;
+    padding: 50px 20px;
+    color: #64748b;
+}
+
+.empty-state i {
+    font-size: 50px;
+    margin-bottom: 15px;
+    opacity: 0.4;
+    display: block;
+}
+
+.empty-state p {
+    font-size: 16px;
+}
+
+/* ── Card Resultado Fila ────────────────────────────────────── */
+.resultado-card {
+    background: rgba(255, 215, 0, 0.06);
+    border: 1px solid rgba(255, 215, 0, 0.3);
+    border-radius: 12px;
+    padding: 24px;
+    margin-top: 20px;
+    animation: fadeInUp 0.5s ease;
+}
+
+.resultado-card .posicao-num {
+    font-size: 64px;
+    font-weight: 700;
+    color: var(--neon-gold);
+    line-height: 1;
+    filter: drop-shadow(0 0 15px rgba(255,215,0,0.5));
+}
+
+.resultado-card .posicao-label {
+    font-size: 13px;
+    color: #94a3b8;
+    margin-bottom: 20px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+/* ── Chart Dashboard ────────────────────────────────────────── */
+.chart-container {
+    position: relative;
+    height: 240px;
+    margin-top: 30px;
+}
+
+/* ── Fila ao vivo badges ────────────────────────────────────── */
+.fila-live {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    flex-wrap: wrap;
+    margin: 20px 0;
+}
+
+.fila-badge {
+    background: rgba(30, 41, 59, 0.8);
+    border: 1px solid rgba(255, 215, 0, 0.2);
+    border-radius: 12px;
+    padding: 16px 24px;
+    text-align: center;
+    min-width: 120px;
+}
+
+.fila-badge .num {
+    font-size: 36px;
+    font-weight: 700;
+    color: var(--neon-gold);
+}
+
+.fila-badge .desc {
+    font-size: 12px;
+    color: #94a3b8;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* ── Confirmação WhatsApp ───────────────────────────────────── */
+.wpp-confirm {
+    background: rgba(37, 211, 102, 0.1);
+    border: 1px solid rgba(37, 211, 102, 0.3);
+    border-radius: 12px;
+    padding: 20px;
+    text-align: center;
+    animation: fadeInUp 0.5s ease;
+}
+
+.wpp-confirm a {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    background: #25D366;
+    color: white;
+    font-weight: 700;
+    text-decoration: none;
+    padding: 12px 28px;
+    border-radius: 50px;
+    margin-top: 12px;
+    transition: 0.3s;
+    font-size: 15px;
+}
+
+.wpp-confirm a:hover { background: #128C7E; transform: scale(1.05); }
+
+/* ── Mobile Responsiveness ──────────────────────────────────── */
+.hamburger {
+    display: none;
+    flex-direction: column;
+    gap: 5px;
+    cursor: pointer;
+    background: none;
+    border: none;
+    padding: 5px;
+}
+
+.hamburger span {
+    display: block;
+    width: 25px;
+    height: 3px;
+    background: var(--neon-gold);
+    border-radius: 3px;
+    transition: 0.3s;
+}
+
+@media (max-width: 768px) {
+    .hamburger { display: flex; }
+
+    .nav-links {
+        display: none;
+        flex-direction: column;
+        position: absolute;
+        top: 70px;
+        left: 0;
+        right: 0;
+        background: rgba(15, 23, 42, 0.98);
+        padding: 20px;
+        gap: 15px;
+        border-bottom: 1px solid rgba(255,215,0,0.2);
+        z-index: 99;
+    }
+
+    .nav-links.open { display: flex; }
+
+    .nav-container { position: relative; }
+
+    .hero-section h1 { font-size: 26px; }
+    .hero-icon { font-size: 48px; }
+
+    .grid-container {
+        grid-template-columns: 1fr;
+    }
+
+    .stepper { gap: 0; }
+    .step::after { width: 60%; }
+
+    h2.page-title { font-size: 22px; }
+
+    table { font-size: 13px; }
+    th, td { padding: 8px 6px; }
+}
+
+@media (max-width: 480px) {
+    .main-content { padding: 20px 12px; }
+    .glass-box { padding: 20px; }
+    .hero-section { padding: 40px 15px 30px; }
 }

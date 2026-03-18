@@ -4,11 +4,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}Barbearia Premium{% endblock %}</title>
+    <title>{% block title %}Barbearia GusJmo{% endblock %}</title>
+    <meta name="description" content="Barbearia GusJmo — Sistema de agendamento online para cortes e barboterapia.">
     <!-- Fontes do Google: Poppins -->
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <!-- Favicon -->
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>✂️</text></svg>">
 </head>
 
 <body>
@@ -19,11 +22,15 @@
                 <i class="fas fa-cut" style="color: #FFD700; margin-right: 10px;"></i>
                 Barbearia <span class="highlight">GusJmo</span>
             </h1>
-            <ul class="nav-links">
-                <li><a href="{{ url_for('home') }}">Início</a></li>
-                <li><a href="{{ url_for('agendar') }}">Agendar</a></li>
-                <li><a href="{{ url_for('fila') }}">Fila</a></li>
-                <li><a href="{{ url_for('agendamentos_view') }}">Painel Admin</a></li>
+            <!-- Hamburger - mobile -->
+            <button class="hamburger" id="hamburger" aria-label="Abrir menu">
+                <span></span><span></span><span></span>
+            </button>
+            <ul class="nav-links" id="navLinks">
+                <li><a href="{{ url_for('home') }}"><i class="fas fa-home"></i> Início</a></li>
+                <li><a href="{{ url_for('agendar') }}"><i class="fas fa-calendar-plus"></i> Agendar</a></li>
+                <li><a href="{{ url_for('fila') }}"><i class="fas fa-users"></i> Fila</a></li>
+                <li><a href="{{ url_for('login') }}" id="adminLink"><i class="fas fa-lock"></i> Admin</a></li>
             </ul>
         </div>
     </nav>
@@ -34,15 +41,39 @@
     </main>
 
     <!-- Botão Flutuante do WhatsApp -->
-    <a href="https://wa.me/5511971707063?text=Ol%C3%A1%2C%20tenho%20uma%20d%C3%BAvida.%20Pode%20me%20ajudar%3F"
-        class="whatsapp-float" target="_blank" title="Fale conosco no WhatsApp">
+    <a href="https://wa.me/5511971707063?text=Ol%C3%A1%2C%20gostaria%20de%20agendar%20um%20hor%C3%A1rio%20na%20Barbearia%20GusJmo!"
+        class="whatsapp-float" target="_blank" title="Agendar pelo WhatsApp">
         <img src="https://upload.wikimedia.org/wikipedia/commons/5/5e/WhatsApp_icon.png" alt="WhatsApp" />
     </a>
 
     <!-- Footer Premium -->
     <footer class="footer">
-        <p>&copy; 2026 GusJmo - Sistema de Agendamento. Desenvolvido para portfólio.</p>
+        <p>&copy; 2026 GusJmo — Sistema de Agendamento. Desenvolvido para portfólio.</p>
     </footer>
+
+    <script>
+        // Hamburger menu
+        const hamburger = document.getElementById('hamburger');
+        const navLinks = document.getElementById('navLinks');
+        hamburger.addEventListener('click', () => navLinks.classList.toggle('open'));
+
+        // Fechar menu ao clicar em link
+        navLinks.querySelectorAll('a').forEach(a => a.addEventListener('click', () => navLinks.classList.remove('open')));
+
+        // Mostrar "Painel Admin" se logado
+        fetch('/stats').then(r => {
+            // Checa se admin está logado para trocar o link de admin
+            fetch('/agendamentos_view', { redirect: 'manual' }).then(res => {
+                if (res.type === 'opaqueredirect' || res.status === 200) {
+                    // Se a rota retornar 200, admin está logado
+                    if (res.status === 200) {
+                        document.getElementById('adminLink').innerHTML = '<i class="fas fa-shield-alt"></i> Painel Admin';
+                        document.getElementById('adminLink').href = '{{ url_for("agendamentos_view") }}';
+                    }
+                }
+            }).catch(() => {});
+        }).catch(() => {});
+    </script>
 
     {% block scripts %}{% endblock %}
 </body>

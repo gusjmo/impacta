@@ -1,33 +1,60 @@
 {% extends 'base.html' %}
+{% block title %}Início — Barbearia GusJmo{% endblock %}
 
 {% block content %}
-<h2 class="page-title">Painel de Controle</h2>
+
+<!-- Hero Section -->
+<section class="hero-section">
+    <i class="fas fa-cut hero-icon"></i>
+    <h1>Barbearia <span>GusJmo</span></h1>
+    <p>Estilo, precisão e atendimento premium.<br>Agende seu horário agora mesmo.</p>
+    <a href="{{ url_for('agendar') }}" class="hero-btn">
+        <i class="fas fa-calendar-plus"></i> Agendar Agora
+    </a>
+</section>
+
+<!-- Painel de Controle -->
+<h2 class="page-title" style="font-size: 20px; color: #94a3b8; font-weight: 400; margin-bottom: 20px;">
+    Painel de Controle
+</h2>
 
 <div class="grid-container">
     <div class="glass-box">
         <i class="fas fa-calendar-plus box-icon"></i>
         <h3>Agendar Cliente</h3>
         <p style="margin-bottom: 15px; font-size: 14px; color: #94a3b8;">Marque um novo horário no sistema.</p>
-        <a href="{{ url_for('agendar') }}" class="btn-gold">Ir para Agendamento</a>
+        <a href="{{ url_for('agendar') }}" class="btn-gold">IR PARA AGENDAMENTO</a>
     </div>
 
     <div class="glass-box">
-        <span id="badgeFila" class="badge">0</span>
+        <span id="badgeFila" class="badge">...</span>
         <i class="fas fa-users box-icon"></i>
         <h3>Fila de Espera</h3>
         <p style="margin-bottom: 15px; font-size: 14px; color: #94a3b8;">Consulte quem é o próximo.</p>
-        <a href="{{ url_for('fila') }}" class="btn-gold">Ver Fila</a>
+        <a href="{{ url_for('fila') }}" class="btn-gold">VER FILA</a>
     </div>
 
     <div class="glass-box">
-        <span id="badgeAgendamentos" class="badge">0</span>
+        <span id="badgeAgendamentos" class="badge">...</span>
         <i class="fas fa-clipboard-list box-icon"></i>
         <h3>Agendamentos do Dia</h3>
         <p style="margin-bottom: 15px; font-size: 14px; color: #94a3b8;">Gestão completa da agenda.</p>
-        <a href="{{ url_for('agendamentos_view') }}" class="btn-gold">Ver Agendamentos</a>
+        <a href="{{ url_for('agendamentos_view') }}" class="btn-gold">VER AGENDAMENTOS</a>
+    </div>
+
+    <div class="glass-box">
+        <i class="fas fa-star box-icon"></i>
+        <h3>Nossos Serviços</h3>
+        <p style="font-size: 14px; color: #94a3b8; margin-bottom: 12px;">O que oferecemos:</p>
+        <ul style="text-align: left; list-style: none; color: #94a3b8; font-size: 14px; line-height: 2;">
+            <li><i class="fas fa-check-circle" style="color: var(--neon-gold); margin-right: 8px;"></i>Corte Clássico</li>
+            <li><i class="fas fa-check-circle" style="color: var(--neon-gold); margin-right: 8px;"></i>Barboterapia</li>
+            <li><i class="fas fa-check-circle" style="color: var(--neon-gold); margin-right: 8px;"></i>Combo Corte + Barba</li>
+        </ul>
     </div>
 </div>
 
+<!-- Próximo Atendimento -->
 <div class="glass-box" style="max-width: 800px; margin: auto; border-color: var(--neon-gold);">
     <h3 style="color: var(--neon-gold);"><i class="fas fa-bell"></i> Próximo Atendimento</h3>
     <div id="proximoAtendimento" style="font-size: 18px; padding: 10px;">
@@ -40,25 +67,26 @@
 <script>
     async function carregarInformacoes() {
         try {
-            const filaResp = await fetch('/fila_total');
-            const filaDados = await filaResp.json();
-            document.getElementById('badgeFila').textContent = filaDados.total;
+            const hoje = new Date().toISOString().split('T')[0];
+            const resp = await fetch(`/stats?data=${hoje}`);
+            const dados = await resp.json();
 
-            const agendResp = await fetch('/agendamentos_total');
-            const agendDados = await agendResp.json();
-            document.getElementById('badgeAgendamentos').textContent = agendDados.total;
+            document.getElementById('badgeFila').textContent = dados.total;
+            document.getElementById('badgeAgendamentos').textContent = dados.total;
 
-            const proxResp = await fetch('/proximo_atendimento');
-            const proxDados = await proxResp.json();
-
-            if (proxDados && proxDados.nome) {
+            if (dados.proximo && dados.proximo.nome) {
                 document.getElementById('proximoAtendimento').innerHTML = `
-                    <p><strong>Cliente:</strong> <span style="color: white">${proxDados.nome}</span></p>
-                    <p><strong>Profissional:</strong> <span style="color: white">${proxDados.profissional}</span></p>
-                    <p><strong>Horário:</strong> <span style="color: var(--neon-gold); font-size: 22px; font-weight: bold;">${proxDados.horario}</span></p>
+                    <p><strong>Cliente:</strong> <span style="color: white">${dados.proximo.nome}</span></p>
+                    <p><strong>Profissional:</strong> <span style="color: white">${dados.proximo.profissional}</span></p>
+                    <p><strong>Horário:</strong> <span style="color: var(--neon-gold); font-size: 22px; font-weight: bold;">${dados.proximo.horario}</span></p>
                 `;
             } else {
-                document.getElementById('proximoAtendimento').innerHTML = "<p>Nenhum atendimento agendado para hoje.</p>";
+                document.getElementById('proximoAtendimento').innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-calendar-check"></i>
+                        <p>Nenhum atendimento agendado para hoje 🎉</p>
+                    </div>
+                `;
             }
         } catch (error) {
             console.error("Erro ao carregar informações", error);

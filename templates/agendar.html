@@ -1,104 +1,275 @@
 {% extends 'base.html' %}
+{% block title %}Agendar Horário — Barbearia GusJmo{% endblock %}
 
 {% block content %}
 <h2 class="page-title">Agendar Horário</h2>
 
-<div class="glass-box" style="max-width: 500px; margin: auto;">
-    <h3 style="color: var(--neon-gold);"><i class="fas fa-calendar-check"></i> Preencha os Dados</h3>
-    
-    <div style="text-align: left; margin-top: 20px;">
-        <label style="font-size: 14px; color: #94a3b8; margin-left: 5px;">Nome Completo</label>
-        <input type="text" id="nome" placeholder="Seu nome">
-        
-        <label style="font-size: 14px; color: #94a3b8; margin-left: 5px;">Telefone / WhatsApp</label>
-        <input type="text" id="telefone" placeholder="(11) 90000-0000">
-        
-        <label style="font-size: 14px; color: #94a3b8; margin-left: 5px;">Serviço Desejado</label>
-        <select id="servico">
-            <option value="">Selecione um serviço</option>
-            <option value="Corte">Corte Clássico</option>
-            <option value="Barba">Barboterapia</option>
-            <option value="Corte + Barba">Corte + Barba (Combo)</option>
-        </select>
-        
-        <label style="font-size: 14px; color: #94a3b8; margin-left: 5px;">Profissional</label>
-        <select id="profissional" onchange="carregarHorariosDisponiveis()">
-            <option value="">Selecione um profissional</option>
-            <option value="João">Mestre João</option>
-            <option value="Carlos">Carlos Barber</option>
-            <option value="Marcos">Marcos Stylist</option>
-        </select>
-        
-        <label style="font-size: 14px; color: #94a3b8; margin-left: 5px;">Horário</label>
-        <select id="horario">
-            <option value="">Selecione o profissional primeiro...</option>
-        </select>
-        
-        <button class="btn-gold" onclick="cadastrarAgendamento()" style="margin-top: 25px;">
-            <i class="fas fa-check"></i> Confirmar Agendamento
+<div class="glass-box" style="max-width: 540px; margin: auto;">
+
+    <!-- Stepper -->
+    <div class="stepper">
+        <div class="step active" id="step-1">
+            <div class="step-num">1</div>
+            <div class="step-label">Seus Dados</div>
+        </div>
+        <div class="step" id="step-2">
+            <div class="step-num">2</div>
+            <div class="step-label">Horário</div>
+        </div>
+        <div class="step" id="step-3">
+            <div class="step-num">3</div>
+            <div class="step-label">Confirmação</div>
+        </div>
+    </div>
+
+    <!-- Etapa 1: Dados pessoais -->
+    <div class="form-step active" id="formStep1">
+        <h3 style="color: var(--neon-gold); margin-bottom: 20px;">
+            <i class="fas fa-user"></i> Seus Dados
+        </h3>
+        <div style="text-align: left;">
+            <label style="font-size: 14px; color: #94a3b8; margin-left: 5px;">Nome Completo *</label>
+            <input type="text" id="nome" placeholder="Seu nome completo">
+
+            <label style="font-size: 14px; color: #94a3b8; margin-left: 5px; margin-top: 5px;">Telefone / WhatsApp *</label>
+            <input type="tel" id="telefone" placeholder="(11) 90000-0000">
+
+            <label style="font-size: 14px; color: #94a3b8; margin-left: 5px; margin-top: 5px;">Serviço Desejado *</label>
+            <select id="servico">
+                <option value="">Selecione um serviço</option>
+                <option value="Corte">✂️ Corte Clássico</option>
+                <option value="Barba">🪒 Barboterapia</option>
+                <option value="Corte + Barba">⭐ Corte + Barba (Combo)</option>
+            </select>
+
+            <button class="btn-gold" onclick="irParaEtapa2()" style="margin-top: 25px;">
+                Próximo <i class="fas fa-arrow-right"></i>
+            </button>
+        </div>
+    </div>
+
+    <!-- Etapa 2: Horário -->
+    <div class="form-step" id="formStep2">
+        <h3 style="color: var(--neon-gold); margin-bottom: 20px;">
+            <i class="fas fa-calendar-alt"></i> Escolha o Horário
+        </h3>
+        <div style="text-align: left;">
+            <label style="font-size: 14px; color: #94a3b8; margin-left: 5px;">Data do Agendamento *</label>
+            <input type="date" id="data" min="">
+
+            <label style="font-size: 14px; color: #94a3b8; margin-left: 5px; margin-top: 5px;">Profissional *</label>
+            <select id="profissional" onchange="carregarHorariosDisponiveis()">
+                <option value="">Selecione um profissional</option>
+                <option value="João">👨‍🦲 Mestre João</option>
+                <option value="Carlos">👨 Carlos Barber</option>
+                <option value="Marcos">🧔 Marcos Stylist</option>
+            </select>
+
+            <label style="font-size: 14px; color: #94a3b8; margin-left: 5px; margin-top: 5px;">Horário Disponível *</label>
+            <select id="horario">
+                <option value="">Selecione o profissional e a data primeiro...</option>
+            </select>
+
+            <div style="display: flex; gap: 10px; margin-top: 25px;">
+                <button class="btn-gold" onclick="voltarEtapa1()" style="background: rgba(255,215,0,0.1); color: var(--neon-gold); border: 1px solid rgba(255,215,0,0.3)">
+                    <i class="fas fa-arrow-left"></i> Voltar
+                </button>
+                <button class="btn-gold" onclick="irParaEtapa3()">
+                    Próximo <i class="fas fa-arrow-right"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Etapa 3: Confirmação -->
+    <div class="form-step" id="formStep3">
+        <h3 style="color: var(--neon-gold); margin-bottom: 20px;">
+            <i class="fas fa-check-circle"></i> Confirmar Agendamento
+        </h3>
+
+        <div id="resumoAgendamento" style="background: rgba(255,215,0,0.06); border: 1px solid rgba(255,215,0,0.2); border-radius: 10px; padding: 20px; text-align: left; margin-bottom: 20px; font-size: 15px; line-height: 2.2;">
+        </div>
+
+        <div style="display: flex; gap: 10px; margin-top: 10px;">
+            <button class="btn-gold" onclick="voltarEtapa2()" style="background: rgba(255,215,0,0.1); color: var(--neon-gold); border: 1px solid rgba(255,215,0,0.3)">
+                <i class="fas fa-arrow-left"></i> Voltar
+            </button>
+            <button class="btn-gold" onclick="cadastrarAgendamento()">
+                <i class="fas fa-check"></i> Confirmar
+            </button>
+        </div>
+    </div>
+
+    <!-- Resultado pós-agendamento (oculto inicialmente) -->
+    <div id="resultadoSucesso" style="display: none;">
+        <div class="wpp-confirm">
+            <i class="fas fa-check-circle" style="font-size: 40px; color: #4ade80; display: block; margin-bottom: 12px;"></i>
+            <h3 style="color: white; margin-bottom: 6px;">Agendamento confirmado! 🎉</h3>
+            <p id="textoConfirmacao" style="color: #94a3b8; font-size: 14px; margin-bottom: 0;"></p>
+            <a id="linkWhatsapp" href="#" target="_blank">
+                <i class="fab fa-whatsapp" style="font-size: 20px;"></i>
+                Enviar confirmação pelo WhatsApp
+            </a>
+        </div>
+        <button class="btn-gold" onclick="window.location.href='{{ url_for('home') }}'" style="margin-top: 15px;">
+            <i class="fas fa-home"></i> Voltar ao Início
         </button>
     </div>
+
 </div>
 {% endblock %}
 
 {% block scripts %}
 <script>
-    async function carregarHorariosDisponiveis() {
+    // Define data mínima como hoje
+    const hoje = new Date().toISOString().split('T')[0];
+    document.getElementById('data').min = hoje;
+    document.getElementById('data').value = hoje;
+
+    // ── Stepper ──────────────────────────────────────────────────────
+    function setStep(n) {
+        [1, 2, 3].forEach(i => {
+            document.getElementById(`formStep${i}`).classList.remove('active');
+            const s = document.getElementById(`step-${i}`);
+            s.classList.remove('active', 'done');
+            if (i < n) s.classList.add('done');
+            if (i === n) s.classList.add('active');
+        });
+        document.getElementById(`formStep${n}`).classList.add('active');
+    }
+
+    function irParaEtapa2() {
+        const nome = document.getElementById('nome').value.trim();
+        const telefone = document.getElementById('telefone').value.trim();
+        const servico = document.getElementById('servico').value;
+        if (!nome || !telefone || !servico) {
+            showToast('⚠️ Preencha todos os campos antes de continuar.', 'error');
+            return;
+        }
+        setStep(2);
+    }
+
+    function voltarEtapa1() { setStep(1); }
+
+    function irParaEtapa3() {
         const profissional = document.getElementById('profissional').value;
-        const selectHorario = document.getElementById('horario');
-        
-        if (!profissional) {
-            selectHorario.innerHTML = '<option value="">Selecione o profissional primeiro...</option>';
+        const horario = document.getElementById('horario').value;
+        const data = document.getElementById('data').value;
+        if (!profissional || !horario || !data) {
+            showToast('⚠️ Selecione a data, profissional e horário.', 'error');
             return;
         }
 
+        // Preencher resumo
+        const nomeServico = document.getElementById('servico').options[document.getElementById('servico').selectedIndex].text;
+        const nomeProfissional = document.getElementById('profissional').options[document.getElementById('profissional').selectedIndex].text;
+        const [year, month, day] = data.split('-');
+        const dataFormatada = `${day}/${month}/${year}`;
+
+        document.getElementById('resumoAgendamento').innerHTML = `
+            <p>👤 <strong>Nome:</strong> ${document.getElementById('nome').value.trim()}</p>
+            <p>📱 <strong>Telefone:</strong> ${document.getElementById('telefone').value.trim()}</p>
+            <p>✂️ <strong>Serviço:</strong> ${nomeServico}</p>
+            <p>👨 <strong>Profissional:</strong> ${nomeProfissional}</p>
+            <p>📅 <strong>Data:</strong> ${dataFormatada}</p>
+            <p>🕐 <strong>Horário:</strong> <strong style="color: var(--neon-gold);">${horario}</strong></p>
+        `;
+        setStep(3);
+    }
+
+    function voltarEtapa2() { setStep(2); }
+
+    // ── Horários disponíveis ─────────────────────────────────────────
+    async function carregarHorariosDisponiveis() {
+        const profissional = document.getElementById('profissional').value;
+        const data = document.getElementById('data').value;
+        const selectHorario = document.getElementById('horario');
+
+        if (!profissional || !data) {
+            selectHorario.innerHTML = '<option value="">Selecione o profissional e a data primeiro...</option>';
+            return;
+        }
+
+        selectHorario.innerHTML = '<option value="">Carregando horários...</option>';
+
         try {
-            const response = await fetch(`/horarios_disponiveis/${profissional}`);
-            if (!response.ok) throw new Error('Erro ao carregar horários disponíveis');
-
+            const response = await fetch(`/horarios_disponiveis/${profissional}?data=${data}`);
             const horarios = await response.json();
-            selectHorario.innerHTML = '<option value="">Selecione um horário disponível</option>';
-
-            horarios.forEach(horario => {
-                let option = document.createElement('option');
-                option.value = horario;
-                option.textContent = horario;
-                selectHorario.appendChild(option);
-            });
+            if (horarios.length === 0) {
+                selectHorario.innerHTML = '<option value="">Sem horários disponíveis nessa data</option>';
+            } else {
+                selectHorario.innerHTML = '<option value="">Selecione um horário</option>';
+                horarios.forEach(h => {
+                    const opt = document.createElement('option');
+                    opt.value = h;
+                    opt.textContent = h;
+                    selectHorario.appendChild(opt);
+                });
+            }
         } catch (error) {
-            alert(error.message);
+            selectHorario.innerHTML = '<option value="">Erro ao carregar horários</option>';
         }
     }
 
+    // Recarregar horários quando a data mudar
+    document.getElementById('data').addEventListener('change', carregarHorariosDisponiveis);
+
+    // ── Cadastrar ────────────────────────────────────────────────────
     async function cadastrarAgendamento() {
         const nome = document.getElementById('nome').value.trim();
         const telefone = document.getElementById('telefone').value.trim();
         const servico = document.getElementById('servico').value;
         const profissional = document.getElementById('profissional').value;
+        const data = document.getElementById('data').value;
         const horario = document.getElementById('horario').value;
-
-        if (!nome || !telefone || !servico || !profissional || !horario) {
-            alert("⚠️ Por favor, preencha todos os campos do formulário.");
-            return;
-        }
 
         try {
             const response = await fetch('/agendamentos', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ nome, telefone, servico, profissional, horario })
+                body: JSON.stringify({ nome, telefone, servico, profissional, data, horario })
             });
 
             const resultado = await response.json();
+
             if (response.ok) {
-                alert("✅ Agendamento realizado com sucesso! Te esperamos na barbearia.");
-                window.location.href = "{{ url_for('home') }}";
+                // Monta link do WhatsApp
+                const [year, month, day] = data.split('-');
+                const dataFormatada = `${day}/${month}/${year}`;
+                const msg = encodeURIComponent(
+                    `Olá! Confirmo meu agendamento na Barbearia GusJmo:\n` +
+                    `📅 Data: ${dataFormatada}\n🕐 Horário: ${horario}\n✂️ Serviço: ${servico}\n` +
+                    `👨 Profissional: ${profissional}`
+                );
+
+                document.getElementById('textoConfirmacao').textContent =
+                    `${nome}, seu horário das ${horario} do dia ${dataFormatada} com ${profissional} está confirmado!`;
+                document.getElementById('linkWhatsapp').href = `https://wa.me/5511971707063?text=${msg}`;
+
+                document.getElementById('formStep3').style.display = 'none';
+                document.getElementById('resultadoSucesso').style.display = 'block';
+                document.querySelectorAll('.stepper .step').forEach(s => s.classList.add('done'));
             } else {
-                alert("❌ " + (resultado.erro || "Erro ao realizar agendamento."));
+                showToast('❌ ' + (resultado.erro || 'Erro ao realizar agendamento.'), 'error');
             }
         } catch (error) {
-            alert("❌ Erro de conexão com o servidor. Tente novamente.");
+            showToast('❌ Erro de conexão com o servidor.', 'error');
         }
+    }
+
+    // ── Toast simples ─────────────────────────────────────────────────
+    function showToast(msg, type) {
+        let t = document.getElementById('toast');
+        if (!t) {
+            t = document.createElement('div');
+            t.id = 'toast';
+            t.style.cssText = `position:fixed;bottom:90px;right:20px;background:${type === 'error' ? '#ef4444' : '#4ade80'};color:white;padding:12px 20px;border-radius:10px;font-weight:600;z-index:9999;max-width:300px;box-shadow:0 8px 20px rgba(0,0,0,0.3);animation:fadeInUp 0.4s ease;`;
+            document.body.appendChild(t);
+        }
+        t.style.background = type === 'error' ? '#ef4444' : '#4ade80';
+        t.textContent = msg;
+        t.style.display = 'block';
+        setTimeout(() => { t.style.display = 'none'; }, 3500);
     }
 </script>
 {% endblock %}

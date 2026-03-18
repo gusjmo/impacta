@@ -1,0 +1,70 @@
+{% extends 'base.html' %}
+{% block title %}Login Admin — Barbearia GusJmo{% endblock %}
+
+{% block content %}
+<div class="login-container">
+    <div class="login-box">
+        <i class="fas fa-shield-alt lock-icon"></i>
+        <h2 style="margin-bottom: 8px; font-size: 22px;">Área Restrita</h2>
+        <p style="color: #64748b; font-size: 14px; margin-bottom: 28px;">
+            Digite a senha de administrador para acessar o painel.
+        </p>
+
+        <div style="text-align: left;">
+            <label style="font-size: 13px; color: #94a3b8; margin-left: 5px;">Senha</label>
+            <input type="password" id="senhaInput" placeholder="••••••••" 
+                   onkeydown="if(event.key==='Enter') fazerLogin()">
+        </div>
+
+        <button class="btn-gold" onclick="fazerLogin()" style="margin-top: 20px;">
+            <i class="fas fa-sign-in-alt"></i> Entrar no Painel
+        </button>
+
+        <div id="erroMsg" style="color: #ef4444; margin-top: 15px; font-size: 14px; display: none;">
+            <i class="fas fa-exclamation-circle"></i> Senha incorreta. Tente novamente.
+        </div>
+
+        <p style="margin-top: 24px; font-size: 13px; color: #475569;">
+            <a href="{{ url_for('home') }}" style="color: #94a3b8; text-decoration: none;">
+                <i class="fas fa-arrow-left"></i> Voltar ao início
+            </a>
+        </p>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    async function fazerLogin() {
+        const senha = document.getElementById('senhaInput').value;
+        const erroMsg = document.getElementById('erroMsg');
+        erroMsg.style.display = 'none';
+
+        if (!senha) {
+            erroMsg.textContent = '⚠️ Digite a senha.';
+            erroMsg.style.display = 'block';
+            return;
+        }
+
+        try {
+            const response = await fetch('/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ senha })
+            });
+
+            if (response.ok) {
+                window.location.href = "{{ url_for('agendamentos_view') }}";
+            } else {
+                erroMsg.innerHTML = '<i class="fas fa-exclamation-circle"></i> Senha incorreta. Tente novamente.';
+                erroMsg.style.display = 'block';
+                document.getElementById('senhaInput').value = '';
+                document.getElementById('senhaInput').focus();
+            }
+        } catch (error) {
+            erroMsg.textContent = 'Erro de conexão. Tente novamente.';
+            erroMsg.style.display = 'block';
+        }
+    }
+</script>
+{% endblock %}
